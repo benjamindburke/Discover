@@ -73,7 +73,7 @@ def getRecommendationsFromSpotify(headers, **kwargs):
         e.x. min_tempo=110
     @kwargs max_* search for songs with max values of specified attributes  
         e.x. max_tempo=160
-    @returns a list of Spotify Song objects
+    @returns a list of Spotify trackIds
     """
     queryString = ''
     if kwargs['seed_tracks']: # extract the array from kwargs to a valid query string
@@ -87,5 +87,5 @@ def getRecommendationsFromSpotify(headers, **kwargs):
     results = requests.get('https://api.spotify.com/v1/recommendations{0}'.format(queryString), headers=headers)
     status = handleResponseCode(results) # handle response code, error if not success
 
-    if status == 200:
-        return results.json()
+    trackIds = [track['id'] for track in results.json()['tracks']]
+    return trackIds
