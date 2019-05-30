@@ -1,4 +1,5 @@
 import DiscoverApi
+import DiscoverDb
 
 # token  : spotify authentication token
 # headers: spotify authentication header. send it with every response
@@ -12,5 +13,4 @@ seed_tracks = [
     '3JOVTQ5h8HGFnDdp4VT3MP',   # Gary Jules - Mad World
 ]
 
-
-DiscoverApi.getRecommendationsFromSpotify(headers, seed_tracks=seed_tracks)
+print(DiscoverApi.getRecommendationsFromSpotify(headers, seed_tracks=seed_tracks))
