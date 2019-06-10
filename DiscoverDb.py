@@ -20,9 +20,9 @@ class DiscoverDb:
 
         @param songs a list of trackData objects returned from Spotify
         """
-        sql = "INSERT INTO tracKData (songId, key, mode, timeSignature, acousticness, danceability, energy, instrumentalness, liveness, loudness, speechiness, valence, tempo) VALUES "
+        sql = "INSERT INTO trackData (spotifyId, acousticness, danceability, energy, instrumentalness, key, liveness, loudness, mode, speechiness, tempo, timeSignature, valence) VALUES "
         for song in songs:
-            sql += "('{id}', {key}, {mode}, {timeSignature}, {acousticness}, {danceability}, {energy}, {instrumentalness}, {liveness}, {loudness}, {speechiness}, {valence}, {tempo})".format_map(song)
+            sql += "('{id}', {acousticness}, {danceability}, {energy}, {instrumentalness}, {key}, {liveness}, {loudness}, {mode}, {speechiness}, {tempo}, {timeSignature}, {valence})".format_map(song)
             if (songs.index(song) != len(songs) - 1):
                 sql += ","
         
@@ -43,15 +43,16 @@ class DiscoverDb:
         conn.execute(sql)
         self._db.commit()
 
-    def storeSongData(self, trackDataId, lyricDataId, artist, name):
+    def storeSongData(self, name, artist, trackId, lyricId):
         """ Adds new songData objects to the database.  
 
-        @param trackDataId the id of the trackData linked to the song   
-        @param lyricDataId the id of the lyricData linked to the song  
+        @param name the name of the song  
         @param artist the name of the artist  
-        @param name the name of the song
+        @param trackId the id of the trackData linked to the song   
+        @param lyricId the id of the lyricData linked to the song  
+
         """
-        sql = "INSERT INTO songData (trackDataId, lyricDataId, artist, name) VALUES ('{0}', '{1}', \"{2}\", '{3}')".format(trackDataId, lyricDataId, artist, name)
+        sql = "INSERT INTO songData (name, artist, trackId, lyricId) VALUES (\"{0}\", \"{1}\", \"{2}\", \"{3}\")".format(name, artist, trackId, lyricId)
         conn = self._db.cursor()
         conn.execute(sql)
         self._db.commit()
