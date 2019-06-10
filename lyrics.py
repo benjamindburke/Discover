@@ -2,15 +2,17 @@ import glob
 import os
 import re
 from multiprocessing import Process
+import DiscoverApi
 from DiscoverDb import DiscoverDb
-path = 'c:\\bin\\Discover\\lyrics-master\\database\\'
 
-files = [f for f in glob.glob(path + "**/*", recursive=True)]
+dbPath = 'c:\\bin\\Discover\\database\\'
+files = [f for f in glob.glob(dbPath + "**/*", recursive=True)]
 wordRgx = r"([A-Za-z0-9']+(\b[\,\.?!])?)"
 infoRgx = r"_{2,}"
 
-def processFile(filepath):
+def processFile(filepath, lyricObjIndex):
     db = DiscoverDb()
+    (_, headers) = DiscoverApi.requestAccessToken()
     with open(filepath, 'r') as f:
         song = { 'artist': '', 'name': '', 'lyrics': [] }
         for line in f:
@@ -26,14 +28,22 @@ def processFile(filepath):
                 for word in re.findall(wordRgx, line):
                     song['lyrics'].append(word[0])
         f.close()
-        db.storeLyricData(song['artist'], song['name'], ' '.join(song['lyrics']), 'lyrics-master')
-        # db.storetrackData( #, #, song['artist'], song['name'])
+        name = song['name'].replace("'", "")
+        artist = song['artist'].replace("'", "")
+        lyrics = song['lyrics']
+        spotifyId = DiscoverApi.searchSpotifyForSongId(headers, name, artist)
+        trackAttributes = DiscoverApi.getTrackAttributes(headers, spotifyId)
+        db.storeLyricData(lyricObjIndex, lyrics)
+        db.storeSongData(spotifyId, name, artist, lyricObjIndex, 'lyrics-master')
+        db.storeTrackData(trackAttributes)
+        print(name, 'by', artist, 'stored')
     db.shutdown()
 
 if __name__ == '__main__':
+    lyricObjIndex = 0
     for file in files:
         if not os.path.isdir(file):
-            p = Process(target=processFile, args=(file,))
+            lyricObjIndex += 1
+            p = Process(target=processFile, args=(file, lyricObjIndex))
             p.start()
             p.join()
-

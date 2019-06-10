@@ -37,30 +37,17 @@ def requestAccessToken():
     else:
         raise Exception('Token could not be requested from Spotify')
 
-def getTrackAttributes(songIds, headers):
-    """ Requests the track attributes for a list of given songIds.  
+def getTrackAttributes(headers, spotifyId):
+    """ Requests the track attributes for a given spotifyId  
 
-    @param songIds a list of songIds to request track attributes for  
     @param headers the Spotify authorization header and other header options  
+    @param spotifyId a songId to request track attributes for  
     @returns a list of track attributes
     """
-    results = requests.get('https://api.spotify.com/v1/audio-features/?ids={0}'.format(songIds[0]), headers=headers)
+    results = requests.get('https://api.spotify.com/v1/audio-features/{0}'.format(spotifyId), headers=headers)
     status = handleResponseCode(results) # handle response code, error if not success
     
-    callCount = 0
-    attributes = []
-    songIdBatches = [songIds[x:x+100] for x in range(0, len(songIds), 100)] # splits songIds into lists of 100, spotify's max id query limit
-    while (callCount < len(songIdBatches) and status == 200):
-        nextUrl = 'https://api.spotify.com/v1/audio-features?ids={0}'.format(','.join(songIdBatches[callCount]))
-        results = requests.get(nextUrl, headers=headers)
-        status = handleResponseCode(results)
-        attributes.concat(results.json()['audio_features'])
-        callCount += 1
-
-    if (len(attributes) != len(songIds)): # make sure num. attribute items == num song items
-        raise Exception('The number of received song attribute items does not match the number of requested song item attributes.')
-    
-    return attributes
+    return results.json()
 
 def getRecommendationsFromSpotify(headers, **kwargs):
     """ Returns a Spotify-generated list of recommendations based on seed trackIds.  
@@ -89,3 +76,18 @@ def getRecommendationsFromSpotify(headers, **kwargs):
 
     trackIds = [track['id'] for track in results.json()['tracks']]
     return trackIds
+
+
+def searchSpotifyForSongId(headers, *searchWords):
+    """ Return the top Spotify search result for a search query.  
+
+    @param searchWords a list of query words
+    @returns spotifyId the spotifyId of the track
+    """
+    queryString = "?q=" + '+'.join(word for word in searchWords) + '&type=track'
+    
+    results = requests.get('https://api.spotify.com/v1/search{0}'.format(queryString), headers=headers)
+    status = handleResponseCode(results) # handle response code, error if not success
+
+    spotifyId = results.json()['tracks']['items'][0]['id']
+    return spotifyId
