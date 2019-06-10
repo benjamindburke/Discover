@@ -87,6 +87,7 @@ def searchSpotifyForSongId(headers, *searchWords):
     queryString = "?q=" + '+'.join(word for word in searchWords) + '&type=track'
     
     callCount = 0
+    status = 200
     while (callCount < 4 and status == 200):
         callCount += 1
         results = requests.get('https://api.spotify.com/v1/search{0}'.format(queryString), headers=headers)
