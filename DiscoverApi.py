@@ -86,20 +86,13 @@ def searchSpotifyForSongId(headers, *searchWords):
     """
     queryString = "?q=" + '+'.join(word for word in searchWords) + '&type=track'
     
-    results = requests.get('https://api.spotify.com/v1/search{0}'.format(queryString), headers=headers)
-    status = handleResponseCode(results) # handle response code, error if not success
-
     callCount = 0
-    if (len(results.json()['tracks']['items']) > 0):
-        spotifyId = results.json()['tracks']['items'][0]['id']
-        return spotifyId
-    else:
-        while (callCount < 4 and status == 200):
-            callCount += 1
-            results = requests.get('https://api.spotify.com/v1/search{0}'.format(queryString), headers=headers)
-            status = handleResponseCode(results) # handle response code, error if not success
-            if (len(results.json()['tracks']['items']) > 0):
-                spotifyId = results.json()['tracks']['items'][0]['id']
-                return spotifyId
+    while (callCount < 4 and status == 200):
+        callCount += 1
+        results = requests.get('https://api.spotify.com/v1/search{0}'.format(queryString), headers=headers)
+        status = handleResponseCode(results) # handle response code, error if not success
+        if (len(results.json()['tracks']['items']) > 0):
+            spotifyId = results.json()['tracks']['items'][0]['id']
+            return spotifyId
 
     return None
