@@ -32,11 +32,14 @@ def processFile(filepath, lyricObjIndex):
         artist = song['artist'].replace("'", "")
         lyrics = song['lyrics']
         spotifyId = DiscoverApi.searchSpotifyForSongId(headers, name, artist)
-        trackAttributes = DiscoverApi.getTrackAttributes(headers, spotifyId)
-        db.storeLyricData(lyricObjIndex, lyrics)
-        db.storeSongData(spotifyId, name, artist, lyricObjIndex, 'lyrics-master')
-        db.storeTrackData(trackAttributes)
-        print(name, 'by', artist, 'stored')
+        if (spotifyId is not None):
+            trackAttributes = DiscoverApi.getTrackAttributes(headers, spotifyId)
+            db.storeLyricData(spotifyId, lyrics)
+            db.storeSongData(spotifyId, name, artist, lyricObjIndex, 'lyrics-master')
+            db.storeTrackData(trackAttributes)
+            print(name, 'by', artist, 'stored')
+        else:
+            print(name, 'by', artist, 'could not be found on spotify.')
     db.shutdown()
 
 if __name__ == '__main__':
