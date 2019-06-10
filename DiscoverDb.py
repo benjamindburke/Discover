@@ -71,3 +71,31 @@ class DiscoverDb:
         conn = self._db.cursor()
         conn.execute(sql)
         self._db.commit()
+
+    def getLyricDataById(self, spotifyId):
+        """ Search the database for lyrics of a specific song.  
+
+        @param spotifyId the spotifyId of the song object  
+        @return lyricData
+        """
+        sql = """SELECT
+                    songData.name,
+                    songData.artist,
+                    songData.spotifyId,
+                    lyricData.word,
+                    lyricData.position
+                FROM
+                    songData
+                INNER JOIN
+                    lyricData
+                    ON songData.spotifyId = lyricData.spotifyId
+                WHERE
+                    songData.spotifyId = '{0}'
+                ORDER BY
+                    lyricData.position
+            """.format(spotifyId)
+
+        conn = self._db.cursor()
+        conn.execute(sql)
+
+        return conn.fetchall()
