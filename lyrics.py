@@ -28,8 +28,8 @@ def processFile(filepath, lyricObjIndex):
                 for word in re.findall(wordRgx, line):
                     song['lyrics'].append(word[0])
         f.close()
-        name = song['name'].replace("'", "")
-        artist = song['artist'].replace("'", "")
+        name = song['name']
+        artist = song['artist']
         lyrics = song['lyrics']
         spotifyId = DiscoverApi.searchSpotifyForSongId(headers, name, artist)
         if (spotifyId is not None):
